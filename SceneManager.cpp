@@ -11,14 +11,23 @@ void SceneManager::update(float dt, sf::RenderWindow& window) {
     if (currentScene) {
         currentScene->update(dt, window);
 
-        
         if (currentScene->isFinished()) {
-            
             if (dynamic_cast<SplashScene*>(currentScene.get())) {
                 currentScene = std::make_unique<MainMenuScene>(config);
             }
+            else if (auto* mainMenu = dynamic_cast<MainMenuScene*>(currentScene.get())) {
+                
+                auto nextScene = mainMenu->extractNextScene();
+                if (nextScene) {
+                    currentScene = std::move(nextScene);
+                }
+                else {
+                    currentScene.reset();
+                }
+            }
             else {
-                currentScene.reset();
+                
+                currentScene = std::make_unique<MainMenuScene>(config);
             }
         }
     }

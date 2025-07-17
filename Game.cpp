@@ -6,36 +6,39 @@
 #include <SFML/Config.hpp>
 #include <SFML/Graphics.hpp>
 #include <cstdint>
-Game::Game() {
-    GameConfig cfg = ConfigManager::load();
-    auto style = sf::WindowStyle::Fullscreen;
-    sf::VideoMode mode(sf::Vector2u(cfg.width, cfg.height));
-    window.create(mode, "Neurocipher Reboot", style);
-    window.setVerticalSyncEnabled(cfg.vsync);
-    sceneManager = SceneManager(cfg);
-}
 
+Game::Game() : sceneManager(ConfigManager::load()) {
+    GameConfig cfg = ConfigManager::load();
+
+    sf::VideoMode mode(sf::Vector2u(cfg.width, cfg.height));
+
+    if (cfg.fullscreen) {
+        window.create(mode, "Neurocipher Reboot", sf::State::Fullscreen);
+    }
+    else {
+        window.create(mode, "Neurocipher Reboot");
+    }
+
+    window.setVerticalSyncEnabled(cfg.vsync);
+}
 
 void Game::run() {
     sf::Clock clock;
 
     while (window.isOpen()) {
-        // Handle events - SFML 3.x style
+        
         while (const std::optional<sf::Event> event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
-            sceneManager.handleEvent(*event, window);
+            sceneManager.handleEvent(*event, window);  
         }
 
-
-        // Update game logic
         float dt = clock.restart().asSeconds();
-        sceneManager.update(dt, window);
+        sceneManager.update(dt, window);  
 
-        // Render
         window.clear();
-        sceneManager.render(window);
+        sceneManager.render(window);  
         window.display();
     }
 }

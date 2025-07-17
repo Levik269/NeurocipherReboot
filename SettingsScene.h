@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Scene.h"
-#include "Config.h" // для GameConfig
+#include "Config.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
@@ -13,8 +13,6 @@ public:
     void handleEvent(const sf::Event& event, sf::RenderWindow& window) override;
     bool isFinished() const override;
 
-    std::unique_ptr<Scene> getNextScene(); // <-- добавим это, если нужна передача сцены обратно
-
 private:
     GameConfig& config;
     sf::Font font;
@@ -22,6 +20,5 @@ private:
     int selectedIndex = 0;
     bool finished = false;
 
-    void applySelection();
     void updateTexts();
 };

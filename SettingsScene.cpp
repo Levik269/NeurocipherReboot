@@ -1,9 +1,10 @@
 #include "SettingsScene.h"
 #include "ConfigManager.h"
 #include <string>
+#include <stdexcept>
 
 SettingsScene::SettingsScene(GameConfig& configRef) : config(configRef) {
-    if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
+    if (!font.openFromFile("C:/Windows/Fonts/arial.ttf")) {
         throw std::runtime_error("Failed to load font");
     }
     updateTexts();
@@ -71,7 +72,9 @@ void SettingsScene::updateTexts() {
     options.clear();
 
     auto makeOption = [&](const std::string& label, const std::string& value, bool selected) {
-        auto text = std::make_unique<sf::Text>(label + ": " + value, font, 24);
+        auto text = std::make_unique<sf::Text>(font);
+        text->setString(label + ": " + value);
+        text->setCharacterSize(24);
         text->setPosition({ 100.f, static_cast<float>(100 + 40 * options.size()) });
         text->setFillColor(selected ? sf::Color::Red : sf::Color::White);
         return text;
@@ -82,7 +85,9 @@ void SettingsScene::updateTexts() {
     options.push_back(makeOption("Fullscreen", config.fullscreen ? "ON" : "OFF", selectedIndex == 1));
     options.push_back(makeOption("VSync", config.vsync ? "ON" : "OFF", selectedIndex == 2));
 
-    auto back = std::make_unique<sf::Text>("Save & Back", font, 24);
+    auto back = std::make_unique<sf::Text>(font);
+    back->setString("Save & Back");
+    back->setCharacterSize(24);
     back->setPosition({ 100.f, static_cast<float>(100 + 40 * options.size()) });
     back->setFillColor(selectedIndex == 3 ? sf::Color::Red : sf::Color::White);
     options.push_back(std::move(back));

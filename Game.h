@@ -10,6 +10,6 @@ public:
 
 private:
     sf::RenderWindow window;
-    std::optional<SceneManager> sceneManager;
+    SceneManager sceneManager;  
     GameConfig cfg;
 };
