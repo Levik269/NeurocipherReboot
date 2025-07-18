@@ -7,7 +7,7 @@ class Game {
 public:
     Game();
     void run();
-
+    void updateWindow();
 private:
     sf::RenderWindow window;
     SceneManager sceneManager;  

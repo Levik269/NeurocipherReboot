@@ -7,7 +7,7 @@
 SplashScene::SplashScene()
 {
     std::vector<std::string> fontPaths = {
-        "assets/fonts/digital-7.ttf",
+        "assets/fonts/digital-7 (italic).ttf",
         "arial.ttf",
         "../assets/fonts/arial.ttf",
         "C:\\Windows\\Fonts\\arial.ttf",
@@ -53,10 +53,11 @@ void SplashScene::render(sf::RenderWindow& window) {
 
     if (backgroundSprite) {
         sf::Vector2f scale(
-            float(size.x) / backgroundTexture.getSize().x,
-            float(size.y) / backgroundTexture.getSize().y
+            static_cast<float>(size.x) / static_cast<float>(backgroundTexture.getSize().x),
+            static_cast<float>(size.y) / static_cast<float>(backgroundTexture.getSize().y)
         );
         backgroundSprite->setScale(scale);
+        backgroundSprite->setPosition(sf::Vector2f(0.f, 0.f));
         window.draw(*backgroundSprite);
     }
 
@@ -94,7 +95,7 @@ void SplashScene::render(sf::RenderWindow& window) {
     }
 
     window.draw(lines);
-    window.display();
+    
 }
 
 

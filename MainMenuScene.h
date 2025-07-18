@@ -26,7 +26,7 @@ private:
     bool glitchActive = false;
     bool finished = false;
     float glitchTimer = 0.f;
-
+    void updatePositions();
 public:
     MainMenuScene(GameConfig& config);
     void update(float deltaTime, sf::RenderWindow& window) override;
