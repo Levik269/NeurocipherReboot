@@ -1,4 +1,4 @@
-#include "SettingsScene.h"
+﻿#include "SettingsScene.h"
 #include "ConfigManager.h"
 #include <string>
 #include <stdexcept>
@@ -7,11 +7,12 @@ SettingsScene::SettingsScene(GameConfig& configRef) : config(configRef) {
     if (!font.openFromFile("C:/Windows/Fonts/arial.ttf")) {
         throw std::runtime_error("Failed to load font");
     }
-    updateTexts();
+    // Убираем updateTexts() из конструктора, так как у нас ещё нет окна
 }
 
-void SettingsScene::update(float, sf::RenderWindow&) {
-    // Nothing to animate for now
+void SettingsScene::update(float dt, sf::RenderWindow& window) {
+    // Обновляем позиции для корректного масштабирования
+    updateTexts(window);
 }
 
 void SettingsScene::render(sf::RenderWindow& window) {
@@ -20,16 +21,16 @@ void SettingsScene::render(sf::RenderWindow& window) {
     }
 }
 
-void SettingsScene::handleEvent(const sf::Event& event, sf::RenderWindow&) {
+void SettingsScene::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         switch (key->scancode) {
         case sf::Keyboard::Scancode::Down:
             selectedIndex = (selectedIndex + 1) % 4;
-            updateTexts();
+            updateTexts(window);
             break;
         case sf::Keyboard::Scancode::Up:
             selectedIndex = (selectedIndex + 3) % 4;
-            updateTexts();
+            updateTexts(window);
             break;
         case sf::Keyboard::Scancode::Left:
         case sf::Keyboard::Scancode::Right:
@@ -51,7 +52,7 @@ void SettingsScene::handleEvent(const sf::Event& event, sf::RenderWindow&) {
                 config.vsync = !config.vsync;
                 break;
             }
-            updateTexts();
+            updateTexts(window);
             break;
         case sf::Keyboard::Scancode::Enter:
             if (selectedIndex == 3) {
@@ -68,14 +69,32 @@ bool SettingsScene::isFinished() const {
     return finished;
 }
 
-void SettingsScene::updateTexts() {
+void SettingsScene::updateTexts(sf::RenderWindow& window) {
+    auto windowSize = window.getSize();
+
+    // Базовые размеры для масштабирования
+    float baseWidth = 1280.0f;
+    float baseHeight = 720.0f;
+    float baseTextSize = 24.0f;
+    float baseX = 100.0f;
+    float baseY = 100.0f;
+    float baseSpacing = 40.0f;
+
+    // Вычисляем масштаб на основе текущего размера окна
+    float scaleX = static_cast<float>(windowSize.x) / baseWidth;
+    float scaleY = static_cast<float>(windowSize.y) / baseHeight;
+    float scale = std::min(scaleX, scaleY);
+
     options.clear();
 
     auto makeOption = [&](const std::string& label, const std::string& value, bool selected) {
         auto text = std::make_unique<sf::Text>(font);
         text->setString(label + ": " + value);
-        text->setCharacterSize(24);
-        text->setPosition({ 100.f, static_cast<float>(100 + 40 * options.size()) });
+        text->setCharacterSize(static_cast<unsigned int>(baseTextSize * scale));
+        text->setPosition(sf::Vector2f(
+            baseX * scaleX,
+            (baseY + baseSpacing * static_cast<float>(options.size())) * scaleY
+        ));
         text->setFillColor(selected ? sf::Color::Red : sf::Color::White);
         return text;
         };
@@ -87,8 +106,11 @@ void SettingsScene::updateTexts() {
 
     auto back = std::make_unique<sf::Text>(font);
     back->setString("Save & Back");
-    back->setCharacterSize(24);
-    back->setPosition({ 100.f, static_cast<float>(100 + 40 * options.size()) });
+    back->setCharacterSize(static_cast<unsigned int>(baseTextSize * scale));
+    back->setPosition(sf::Vector2f(
+        baseX * scaleX,
+        (baseY + baseSpacing * static_cast<float>(options.size())) * scaleY
+    ));
     back->setFillColor(selectedIndex == 3 ? sf::Color::Red : sf::Color::White);
     options.push_back(std::move(back));
 }

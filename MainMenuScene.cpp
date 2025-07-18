@@ -51,40 +51,28 @@ MainMenuScene::MainMenuScene(GameConfig& config) : config(config) {
     // Правильная инициализация sf::Text для SFML 3.1
     titleText = std::make_unique<sf::Text>(font);
     titleText->setString("NEUROCIPHER REBOOT");
-    titleText->setCharacterSize(76);
     titleText->setFillColor(sf::Color(139, 0, 0));
-    
 
     startText = std::make_unique<sf::Text>(font);
     startText->setString("Start game");
-    startText->setCharacterSize(24);
     startText->setFillColor(sf::Color(139, 0, 0));
-    
 
     loadText = std::make_unique<sf::Text>(font);
     loadText->setString("Load game");
-    loadText->setCharacterSize(24);
     loadText->setFillColor(sf::Color(139, 0, 0));
-    
 
     optionsText = std::make_unique<sf::Text>(font);
     optionsText->setString("Options");
-    optionsText->setCharacterSize(24);
     optionsText->setFillColor(sf::Color(139, 0, 0));
-    
 
     exitText = std::make_unique<sf::Text>(font);
     exitText->setString("Exit");
-    exitText->setCharacterSize(24);
     exitText->setFillColor(sf::Color(139, 0, 0));
-    
 
     glitchTitleText = std::make_unique<sf::Text>(font);
     glitchTitleText->setString("NEUROCIPHER REBOOT");
-    glitchTitleText->setCharacterSize(76);
     glitchTitleText->setFillColor(sf::Color(139, 0, 0));
-
-    updatePositions();
+    
     // Добавляем в меню
     menuItems.push_back(startText.get());
     menuItems.push_back(loadText.get());
@@ -96,6 +84,7 @@ MainMenuScene::MainMenuScene(GameConfig& config) : config(config) {
 void MainMenuScene::update(float deltaTime, sf::RenderWindow& window) {
 
     // Hover update
+    updatePositions(window);
     hoveredIndex = -1;
     sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
     sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
@@ -117,6 +106,7 @@ void MainMenuScene::update(float deltaTime, sf::RenderWindow& window) {
     if (glitchActive) {
         float offsetX = static_cast<float>((rand() % 5) - 2);
         float offsetY = static_cast<float>((rand() % 5) - 2);
+        auto currentPos = titleText->getPosition();
         titleText->setPosition({ 100.f + offsetX, 100.f + offsetY });
         glitchTitleText->setPosition({ 102.f - offsetX, 102.f - offsetY });
     }
@@ -126,7 +116,7 @@ void MainMenuScene::update(float deltaTime, sf::RenderWindow& window) {
 
     // Глич линии при наведении
     glitchLines.clear();
-    if (hoveredIndex != -1) {
+    if (hoveredIndex != -1 && hoveredIndex < menuItems.size()) {
         auto bounds = menuItems[hoveredIndex]->getGlobalBounds();
         float x = bounds.position.x;
         float y = bounds.position.y;
@@ -219,14 +209,40 @@ std::unique_ptr<Scene> MainMenuScene::extractNextScene() {
 }
 
 void MainMenuScene::updatePositions() {
-    float baseX = config.width * 0.078f;  // ~100px для 1280px
-    float baseY = config.height * 0.139f; // ~100px для 720px
-    float menuSpacing = config.height * 0.069f; // ~50px для 720px
-
-    titleText->setPosition(sf::Vector2f(baseX, baseY));
-    startText->setPosition(sf::Vector2f(baseX, baseY + config.height * 0.278f)); // ~200px для 720px
-    loadText->setPosition(sf::Vector2f(baseX, baseY + config.height * 0.347f)); // ~250px для 720px
-    optionsText->setPosition(sf::Vector2f(baseX, baseY + config.height * 0.417f)); // ~300px для 720px
-    exitText->setPosition(sf::Vector2f(baseX, baseY + config.height * 0.486f)); // ~350px для 720px
 }
 
+void MainMenuScene::updatePositions(sf::RenderWindow& window) {
+    auto windowSize = window.getSize();
+
+    // Базовые размеры для масштабирования
+    float baseWidth = 1280.0f;
+    float baseHeight = 720.0f;
+
+    // Вычисляем масштаб на основе текущего размера окна
+    float scaleX = static_cast<float>(windowSize.x) / baseWidth;
+    float scaleY = static_cast<float>(windowSize.y) / baseHeight;
+    float scale = std::min(scaleX, scaleY); // Используем минимальный масштаб для сохранения пропорций
+
+    // Базовые позиции и размеры
+    float baseX = 100.0f;
+    float baseY = 100.0f;
+    float baseTitleSize = 76.0f;
+    float baseMenuSize = 24.0f;
+    float baseMenuSpacing = 50.0f;
+
+    // Применяем масштаб к размерам текста
+    titleText->setCharacterSize(static_cast<unsigned int>(baseTitleSize * scale));
+    startText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
+    loadText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
+    optionsText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
+    exitText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
+    glitchTitleText->setCharacterSize(static_cast<unsigned int>(baseTitleSize * scale));
+
+    // Применяем масштаб к позициям
+    titleText->setPosition(sf::Vector2f(baseX * scaleX, baseY * scaleY));
+    startText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 200.0f) * scaleY));
+    loadText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 250.0f) * scaleY));
+    optionsText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 300.0f) * scaleY));
+    exitText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 350.0f) * scaleY));
+    glitchTitleText->setPosition(sf::Vector2f((baseX + 2.0f) * scaleX, (baseY + 2.0f) * scaleY));
+}

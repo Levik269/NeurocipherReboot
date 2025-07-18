@@ -1,6 +1,5 @@
-﻿// В SplashScene.h
+﻿// SplashScene.h
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include "Scene.h"
@@ -21,8 +20,10 @@ private:
     sf::Font font;
     std::unique_ptr<sf::Text> titleText;
 
-    sf::Texture backgroundTexture;  // просто объект
-    std::unique_ptr<sf::Sprite> backgroundSprite; // указатель для Sprite
+    sf::Texture backgroundTexture;
+    std::unique_ptr<sf::Sprite> backgroundSprite;
+
+    void updatePositions(sf::RenderWindow& window);
 };
 
 

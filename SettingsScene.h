@@ -20,5 +20,5 @@ private:
     int selectedIndex = 0;
     bool finished = false;
 
-    void updateTexts();
+    void updateTexts(sf::RenderWindow& window);
 };
