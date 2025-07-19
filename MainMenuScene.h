@@ -4,7 +4,7 @@
 #include <memory>
 #include "Scene.h"
 #include "Config.h"
-
+#include "GlitchRenderer.h"
 class MainMenuScene : public Scene {
 private:
     sf::Texture backgroundTexture;
@@ -17,15 +17,15 @@ private:
     std::unique_ptr<sf::Text> optionsText;
     std::unique_ptr<sf::Text> exitText;
 
-    std::unique_ptr<sf::Text> glitchTitleText;
+    GlitchRenderer glitchRenderer;
     std::unique_ptr<Scene> nextScene;
     std::vector<sf::Text*> menuItems;
-    std::vector<sf::RectangleShape> glitchLines;
+    
     int hoveredIndex = -1;
 
-    bool glitchActive = false;
+    
     bool finished = false;
-    float glitchTimer = 0.f;
+    
     void updatePositions();
     void updatePositions(sf::RenderWindow& window);
 public:

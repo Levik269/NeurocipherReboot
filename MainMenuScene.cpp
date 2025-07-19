@@ -68,17 +68,13 @@ MainMenuScene::MainMenuScene(GameConfig& config) : config(config) {
     exitText = std::make_unique<sf::Text>(font);
     exitText->setString("Exit");
     exitText->setFillColor(sf::Color(139, 0, 0));
-
-    glitchTitleText = std::make_unique<sf::Text>(font);
-    glitchTitleText->setString("NEUROCIPHER REBOOT");
-    glitchTitleText->setFillColor(sf::Color(139, 0, 0));
     
     // Добавляем в меню
     menuItems.push_back(startText.get());
     menuItems.push_back(loadText.get());
     menuItems.push_back(optionsText.get());
     menuItems.push_back(exitText.get());
-    menuItems.push_back(glitchTitleText.get());
+    
 }
 
 void MainMenuScene::update(float deltaTime, sf::RenderWindow& window) {
@@ -95,41 +91,7 @@ void MainMenuScene::update(float deltaTime, sf::RenderWindow& window) {
         }
     }
 
-    // Глич эффект на заголовке
-    glitchTimer += deltaTime;
-
-    if (glitchTimer > 1.f) {
-        glitchActive = rand() % 3 == 0; // иногда включается
-        glitchTimer = 0.f;
-    }
-
-    if (glitchActive) {
-        float offsetX = static_cast<float>((rand() % 5) - 2);
-        float offsetY = static_cast<float>((rand() % 5) - 2);
-        auto currentPos = titleText->getPosition();
-        titleText->setPosition({ 100.f + offsetX, 100.f + offsetY });
-        glitchTitleText->setPosition({ 102.f - offsetX, 102.f - offsetY });
-    }
-    else {
-        titleText->setPosition({ 100.f, 100.f });
-    }
-
-    // Глич линии при наведении
-    glitchLines.clear();
-    if (hoveredIndex != -1 && hoveredIndex < menuItems.size()) {
-        auto bounds = menuItems[hoveredIndex]->getGlobalBounds();
-        float x = bounds.position.x;
-        float y = bounds.position.y;
-        float w = bounds.size.x;
-        float h = bounds.size.y;
-        sf::RectangleShape glitch(sf::Vector2f(w * (0.3f + 0.2f * (rand() % 3)), 2.f));
-        glitch.setFillColor(sf::Color::Red);
-        glitch.setPosition(sf::Vector2f(
-            x + static_cast<float>(rand() % static_cast<int>(w / 2)),
-            y + 5.f + static_cast<float>(rand() % static_cast<int>(h - 10.f))
-        ));
-        glitchLines.push_back(glitch);
-    }
+    glitchRenderer.update(deltaTime);
 }
 
 void MainMenuScene::render(sf::RenderWindow& window) {
@@ -153,17 +115,26 @@ void MainMenuScene::render(sf::RenderWindow& window) {
         window.draw(backgroundSprite.value());
     }
 
-    if (glitchActive)
-        window.draw(*glitchTitleText);
+    // Рендерим фон с глич-эффектом
+    glitchRenderer.renderBackground(window, backgroundTexture);
 
+    // Рендерим заголовок с глич-эффектом
+    glitchRenderer.renderGlitchText(window, *titleText, "NEUROCIPHER REBOOT");
     window.draw(*titleText);
+
+    // Остальные элементы меню...
     window.draw(*startText);
     window.draw(*loadText);
     window.draw(*optionsText);
     window.draw(*exitText);
 
-    for (const auto& line : glitchLines)
-        window.draw(line);
+    // Глич-линии при наведении
+    if (hoveredIndex != -1 && hoveredIndex < menuItems.size()) {
+        glitchRenderer.renderHoverGlitch(window, menuItems[hoveredIndex]->getGlobalBounds());
+    }
+
+    // Общие глич-линии на экране
+    glitchRenderer.renderGlitchLines(window, 15);
 }
 
 void MainMenuScene::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
@@ -236,7 +207,7 @@ void MainMenuScene::updatePositions(sf::RenderWindow& window) {
     loadText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
     optionsText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
     exitText->setCharacterSize(static_cast<unsigned int>(baseMenuSize * scale));
-    glitchTitleText->setCharacterSize(static_cast<unsigned int>(baseTitleSize * scale));
+    
 
     // Применяем масштаб к позициям
     titleText->setPosition(sf::Vector2f(baseX * scaleX, baseY * scaleY));
@@ -244,5 +215,5 @@ void MainMenuScene::updatePositions(sf::RenderWindow& window) {
     loadText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 250.0f) * scaleY));
     optionsText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 300.0f) * scaleY));
     exitText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 350.0f) * scaleY));
-    glitchTitleText->setPosition(sf::Vector2f((baseX + 2.0f) * scaleX, (baseY + 2.0f) * scaleY));
+    
 }

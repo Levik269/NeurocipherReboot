@@ -8,3 +8,11 @@ struct GameConfig {
     bool fullscreen = false;
     bool vsync = true;
 };
+
+struct Resolution {
+    unsigned int width;
+    unsigned int height;
+    std::string name;
+};
+
+extern const std::vector<Resolution> AVAILABLE_RESOLUTIONS;

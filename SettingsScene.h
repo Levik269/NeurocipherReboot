@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
-
+#include "GlitchRenderer.h"
 class SettingsScene : public Scene {
 public:
     SettingsScene(GameConfig& config);
@@ -14,6 +14,8 @@ public:
     bool isFinished() const override;
 
 private:
+    GlitchRenderer glitchRenderer;
+    int currentResolutionIndex = 0;
     GameConfig& config;
     sf::Font font;
     std::vector<std::unique_ptr<sf::Text>> options;
@@ -21,4 +23,12 @@ private:
     bool finished = false;
 
     void updateTexts(sf::RenderWindow& window);
+    std::vector<sf::Text*> menuItems;
+    int hoveredIndex = -1;
+    void updatePositions(sf::RenderWindow& window);
+
+    sf::Texture backgroundTexture;
+    std::optional<sf::Sprite> backgroundSprite;
+    
+    
 };

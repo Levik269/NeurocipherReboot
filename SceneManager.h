@@ -5,6 +5,7 @@
 #include <SFML/Config.hpp>
 #include <SFML/Window.hpp>
 #include "Config.h"
+#include "ConfigManager.h"
 class Game;
 class SceneManager {
 public:

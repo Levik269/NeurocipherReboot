@@ -1,6 +1,7 @@
 ﻿// ConfigManager.h
 #pragma once
 #include "Config.h"
+#include <vector>
 
 class ConfigManager {
 public:
