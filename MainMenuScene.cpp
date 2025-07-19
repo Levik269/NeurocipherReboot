@@ -146,7 +146,6 @@ void MainMenuScene::handleEvent(const sf::Event& event, sf::RenderWindow& window
             if (menuItems[i]->getGlobalBounds().contains(worldPos)) {
                 switch (i) {
                 case 0:
-                    std::cout << "Start Game clicked\n";
                     break;
                 case 1:
                     std::cout << "Load Game clicked\n";

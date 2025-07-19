@@ -11,14 +11,14 @@ void GlitchRenderer::update(float deltaTime) {
     // Обновляем таймер для фона
     backgroundGlitchTimer += deltaTime;
     if (backgroundGlitchTimer > 0.8f) {
-        backgroundGlitchActive = (rand() % 2 == 0); // 25% шанс
+        backgroundGlitchActive = (rand() % 2 == 0); // 50% шанс
         backgroundGlitchTimer = 0.f;
     }
 
     // Обновляем таймер для текста
     textGlitchTimer += deltaTime;
     if (textGlitchTimer > 1.0f) {
-        textGlitchActive = (rand() % 3 == 0); // 33% шанс
+        textGlitchActive = (rand() % 2 == 0); // 50% шанс
         textGlitchTimer = 0.f;
     }
 }

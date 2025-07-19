@@ -17,7 +17,7 @@ SettingsScene::SettingsScene(GameConfig& configRef) : config(configRef) {
             break;
         }
     }
-    // Загрузка фона (используем тот же что и в главном меню)
+    
     if (backgroundTexture.loadFromFile("assets/textures/SettingsMenu.png")) {
         backgroundSprite.emplace(backgroundTexture);
     }

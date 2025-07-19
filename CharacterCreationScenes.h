@@ -145,3 +145,4 @@ public:
     void update(float deltaTime, sf::RenderWindow& window) override;
     void handleEvent(const sf::Event& event, sf::RenderWindow& window) override;
 };
+
