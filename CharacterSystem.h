@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -13,7 +13,8 @@ enum class Origin {
 };
 
 enum class Background {
-    Hacker, Mercenary, Trader, Technician, StreetDoctor, Detective
+    Military, Criminal, Academic, Corporate, // Исходные значения из конструктора BackgroundSelectionScene
+    Hacker, Mercenary, Trader, Technician, StreetDoctor, Detective // Значения из getBackgroundInfo
 };
 
 // Origin and Background info structures
@@ -51,12 +52,12 @@ struct SubSkill {
 struct Skill {
     std::string name;
     std::string description;
-    std::vector<SubSkill> subskills;
+    std::unordered_map<std::string, int> subskills; // Изменено с vector<SubSkill> на map<string, int>
 
     float getAverageLevel() const {
         if (subskills.empty()) return 0.0f;
         float total = 0;
-        for (const auto& ss : subskills) total += ss.level;
+        for (const auto& [name, level] : subskills) total += level;
         return total / subskills.size();
     }
 
@@ -64,24 +65,12 @@ struct Skill {
         return static_cast<int>(getAverageLevel());
     }
 
-    // Get total skill points invested in this skill
     int getTotalInvestment() const {
         int total = 0;
-        for (const auto& ss : subskills) {
-            total += ss.level;
+        for (const auto& [name, level] : subskills) {
+            total += level;
         }
         return total;
-    }
-
-    // Get the dominant subskill (highest level)
-    const SubSkill* getDominantSubskill() const {
-        if (subskills.empty()) return nullptr;
-
-        auto maxIt = std::max_element(subskills.begin(), subskills.end(),
-            [](const SubSkill& a, const SubSkill& b) {
-                return a.level < b.level;
-            });
-        return &(*maxIt);
     }
 };
 
@@ -101,17 +90,17 @@ public:
         initializeSkills();
     }
 
-    void initializeSkills() {
+    void CharacterStats::initializeSkills() {
         // Tech skill tree
         skills["Tech"] = Skill{
             "Tech",
             "Technical expertise and digital manipulation",
             {
-                {"Hacking", "Break into systems and networks"},
-                {"Repair", "Fix and maintain equipment"},
-                {"Programming", "Create and modify software"},
-                {"Drone Control", "Operate remote devices"},
-                {"Assembly", "Build and craft items"}
+                {"Hacking", 0},
+                {"Repair", 0},
+                {"Programming", 0},
+                {"Drone Control", 0},
+                {"Assembly", 0}
             }
         };
 
@@ -120,12 +109,12 @@ public:
             "Intellect",
             "Mental capacity and knowledge",
             {
-                {"Analytics", "Process information and deduce patterns"},
-                {"Memory", "Retain and recall information"},
-                {"Erudition", "General knowledge and education"},
-                {"Mathematics", "Numerical and logical reasoning"},
-                {"Linguistics", "Language skills and communication"},
-                {"Chemistry/Physics", "Scientific understanding"}
+                {"Analytics", 0},
+                {"Memory", 0},
+                {"Erudition", 0},
+                {"Mathematics", 0},
+                {"Linguistics", 0},
+                {"Chemistry/Physics", 0}
             }
         };
 
@@ -134,11 +123,11 @@ public:
             "Physical",
             "Bodily capabilities and coordination",
             {
-                {"Strength", "Raw physical power"},
-                {"Dexterity", "Fine motor control and precision"},
-                {"Stamina", "Endurance and resilience"},
-                {"Reaction", "Speed of response"},
-                {"Balance", "Coordination and stability"}
+                {"Strength", 0},
+                {"Dexterity", 0},
+                {"Stamina", 0},
+                {"Reaction", 0},
+                {"Balance", 0}
             }
         };
 
@@ -147,11 +136,11 @@ public:
             "Biomod",
             "Biological modification and enhancement",
             {
-                {"Compatibility", "Adapt to implants and mods"},
-                {"Adjustment", "Fine-tune biological systems"},
-                {"Self-Diagnosis", "Monitor own health status"},
-                {"Implant Communication", "Interface with augmentations"},
-                {"Regeneration", "Accelerated healing"}
+                {"Compatibility", 0},
+                {"Adjustment", 0},
+                {"Self-Diagnosis", 0},
+                {"Implant Communication", 0},
+                {"Regeneration", 0}
             }
         };
 
@@ -160,11 +149,11 @@ public:
             "Social",
             "Interpersonal skills and influence",
             {
-                {"Persuasion", "Convince others through argument"},
-                {"Deception", "Mislead and manipulate"},
-                {"Trading", "Negotiate deals and prices"},
-                {"Leadership", "Guide and inspire others"},
-                {"Acting", "Assume false personas"}
+                {"Persuasion", 0},
+                {"Deception", 0},
+                {"Trading", 0},
+                {"Leadership", 0},
+                {"Acting", 0}
             }
         };
 
@@ -173,15 +162,16 @@ public:
             "Combat",
             "Fighting skills and tactical knowledge",
             {
-                {"Shooting", "Ranged weapon proficiency"},
-                {"Melee", "Close combat effectiveness"},
-                {"Tactics", "Strategic thinking in combat"},
-                {"Weapon Mastery", "Specialized weapon expertise"},
-                {"Evasion", "Avoid attacks and danger"},
-                {"Unarmed", "Hand-to-hand combat"}
+                {"Shooting", 0},
+                {"Melee", 0},
+                {"Tactics", 0},
+                {"Weapon Mastery", 0},
+                {"Evasion", 0},
+                {"Unarmed", 0}
             }
         };
     }
+    
 
     void applyOriginBonuses() {
         switch (origin) {
@@ -240,16 +230,14 @@ public:
     }
 
     // Skill manipulation methods
-    bool increaseSubskill(const std::string& skillName, const std::string& subskillName, int amount = 1) {
+    bool CharacterStats::increaseSubskill(const std::string& skillName, const std::string& subskillName, int amount = 1) {
         auto skillIt = skills.find(skillName);
         if (skillIt == skills.end()) return false;
 
-        for (auto& subskill : skillIt->second.subskills) {
-            if (subskill.name == subskillName) {
-                int newLevel = std::min(subskill.level + amount, subskill.maxLevel);
-                subskill.level = newLevel;
-                return true;
-            }
+        auto subskillIt = skillIt->second.subskills.find(subskillName);
+        if (subskillIt != skillIt->second.subskills.end()) {
+            subskillIt->second += amount;
+            return true;
         }
         return false;
     }

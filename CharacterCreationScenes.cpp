@@ -404,10 +404,10 @@ void SkillDistributionScene::handleSelection(int index) {
 }
 
 void SkillDistributionScene::updateSkillButtons() {
-    pointsText->setString("Skill Points Remaining: " + std::to_string(character.skillPoints));
+    pointsText->setString("Skill Points Remaining: " + std::to_string(character.freeSkillPoints));
 
     // Update finish button visibility
-    showFinishButton = (character.skillPoints == 0);
+    showFinishButton = (character.freeSkillPoints == 0);
 
     if (showFinishButton) {
         finishButton.setFillColor(sf::Color(0, 100, 0, 180));
@@ -548,12 +548,66 @@ void SkillDistributionScene::handleEvent(const sf::Event& event, sf::RenderWindo
                 return;
             }
 
-            // Handle skill button clicks (implement skill point distribution logic here)
-            // This would involve checking mouse position against skill +/- buttons
+            // Handle skill button clicks
+            handleSkillButtonClick(mousePos);
         }
     }
 
     CharacterCreationScene::handleEvent(event, window);
+}
+
+void SkillDistributionScene::handleSkillButtonClick(sf::Vector2f mousePos) {
+    auto windowSize = sf::RenderWindow(sf::VideoMode(1280, 720), "temp").getSize();
+    float scaleX = static_cast<float>(windowSize.x) / 1280.0f;
+    float scaleY = static_cast<float>(windowSize.y) / 720.0f;
+
+    sf::Vector2f startPos(50.0f * scaleX, 150.0f * scaleY);
+    float yOffset = 0;
+
+    for (const auto& [skillName, skill] : character.skills) {
+        float skillYOffset = 30.0f * scaleY;
+
+        for (const auto& [subskillName, level] : skill.subskills) {
+            // Check plus button
+            sf::FloatRect plusButton(startPos.x + 300.0f * scaleX,
+                startPos.y + yOffset + skillYOffset,
+                20.0f * scaleX, 20.0f * scaleY);
+
+            if (plusButton.contains(mousePos)) {
+                // Calculate cost for next level
+                int currentLevel = level;
+                int cost = (currentLevel / 10) + 1;
+
+                if (character.freeSkillPoints >= cost && currentLevel < 100) {
+                    character.increaseSubskill(skillName, subskillName, 1);
+                    character.freeSkillPoints -= cost;
+                    updateSkillButtons();
+                }
+                return;
+            }
+
+            // Check minus button (only if level > 0)
+            if (level > 0) {
+                sf::FloatRect minusButton(startPos.x + 330.0f * scaleX,
+                    startPos.y + yOffset + skillYOffset,
+                    20.0f * scaleX, 20.0f * scaleY);
+
+                if (minusButton.contains(mousePos)) {
+                    // Refund points
+                    int newLevel = level - 1;
+                    int refund = (newLevel / 10) + 1;
+
+                    character.increaseSubskill(skillName, subskillName, -1);
+                    character.freeSkillPoints += refund;
+                    updateSkillButtons();
+                    return;
+                }
+            }
+
+            skillYOffset += 25.0f * scaleY;
+        }
+        yOffset += 120.0f * scaleY;
+    }
 }
 
 // CharacterNameScene implementation
@@ -631,4 +685,39 @@ void CharacterNameScene::update(float deltaTime, sf::RenderWindow& window) {
         cursorBlinkTime = 0.0f;
         updateInputDisplay();
     }
+}
+
+void CharacterNameScene::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
+    if (event.type == sf::Event::TextEntered) {
+        if (isInputActive) {
+            if (event.text.unicode == '\b') { // Backspace
+                if (!inputText.empty()) {
+                    inputText.pop_back();
+                    updateInputDisplay();
+                }
+            }
+            else if (event.text.unicode == '\r' || event.text.unicode == '\n') { // Enter
+                if (!inputText.empty()) {
+                    character.characterName = inputText;
+                    finished = true;
+                    // Here you would typically transition to the game or final summary
+                }
+            }
+            else if (event.text.unicode < 128 && event.text.unicode >= 32) { // Printable ASCII
+                if (inputText.length() < 30) { // Limit name length
+                    inputText += static_cast<char>(event.text.unicode);
+                    updateInputDisplay();
+                }
+            }
+        }
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed) {
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+            isInputActive = inputBox.getGlobalBounds().contains(mousePos);
+        }
+    }
+
+    CharacterCreationScene::handleEvent(event, window);
 }
