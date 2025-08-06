@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "Config.h"
 #include "GlitchRenderer.h"
+#include "SaveManager.h"
 class MainMenuScene : public Scene {
 private:
     sf::Texture backgroundTexture;
@@ -18,6 +19,7 @@ private:
     std::unique_ptr<sf::Text> exitText;
 
     GlitchRenderer glitchRenderer;
+    SaveManager saveManager;
     std::unique_ptr<Scene> nextScene;
     std::vector<sf::Text*> menuItems;
     
@@ -28,6 +30,7 @@ private:
     
     void updatePositions();
     void updatePositions(sf::RenderWindow& window);
+    void onStartGameClicked();
 public:
     MainMenuScene(GameConfig& config);
     void update(float deltaTime, sf::RenderWindow& window) override;

@@ -27,6 +27,11 @@ public:
     // Глич эффект при наведении на элемент
     void renderHoverGlitch(sf::RenderWindow& window, const sf::FloatRect& bounds);
 
+    void setBackgroundDarkening(bool enabled, float intensity = 0.5f);
+    void setCyberpunkSquares(bool enabled);
+    void setAnalogGlitch(bool enabled);
+    void renderCyberpunkSquares(sf::RenderWindow& window, int squareCount = 5);
+
 private:
     // Таймеры и состояния
     float backgroundGlitchTimer = 0.f;
@@ -47,4 +52,15 @@ private:
     // Вспомогательные функции
     float getRandomOffset(float intensity) const;
     sf::Color getGlitchColor() const;
+
+    bool backgroundDarkeningEnabled;
+    float darkeningIntensity;
+
+    bool cyberpunkSquaresEnabled;
+    float squareGlitchTimer;
+
+    bool analogGlitchEnabled;
+    float analogOffsetX;
+    float analogOffsetY;
+    float analogTimer;
 };

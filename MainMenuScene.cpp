@@ -10,6 +10,8 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics.hpp>
 #include "SettingsScene.h"
+#include "CharacterCreationScenes.h"
+#include "SaveManager.h"
 
 MainMenuScene::MainMenuScene(GameConfig& config) : config(config) {
     // Инициализация генератора случайных чисел
@@ -135,6 +137,18 @@ void MainMenuScene::render(sf::RenderWindow& window) {
 
     // Общие глич-линии на экране
     glitchRenderer.renderGlitchLines(window, 15);
+
+    // Включение затемнения на 30%
+    glitchRenderer.setBackgroundDarkening(true, 0.3f);
+
+    // Включение аналогового глитча
+    glitchRenderer.setAnalogGlitch(true);
+
+    // Включение киберпанк квадратов
+    glitchRenderer.setCyberpunkSquares(true);
+
+    // В цикле рендеринга
+    glitchRenderer.renderCyberpunkSquares(window, 8); // 8 квадратов
 }
 
 void MainMenuScene::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
@@ -146,6 +160,8 @@ void MainMenuScene::handleEvent(const sf::Event& event, sf::RenderWindow& window
             if (menuItems[i]->getGlobalBounds().contains(worldPos)) {
                 switch (i) {
                 case 0:
+                    std::cout << "Start Game clicked\n";
+                    onStartGameClicked();
                     break;
                 case 1:
                     std::cout << "Load Game clicked\n";
@@ -216,3 +232,41 @@ void MainMenuScene::updatePositions(sf::RenderWindow& window) {
     exitText->setPosition(sf::Vector2f(baseX * scaleX, (baseY + 350.0f) * scaleY));
     
 }
+
+void MainMenuScene::onStartGameClicked() {
+    // Базовое имя сохранения
+    std::string baseSaveName = "NewSave";
+
+    // Генерируем уникальное имя, чтобы не перезаписывать существующие
+    std::string uniqueSaveName = saveManager.generateUniqueSaveName(baseSaveName);
+
+    PlayerData newPlayerData;
+    newPlayerData.name = "Player"; // можно запросить позже у игрока
+    newPlayerData.level = 1;
+    newPlayerData.experience = 0;
+    newPlayerData.health = 100;
+    newPlayerData.maxHealth = 100;
+    newPlayerData.strength = 10;
+    newPlayerData.intelligence = 10;
+    newPlayerData.agility = 10;
+    newPlayerData.playtime = 0.f;
+
+    if (!saveManager.createNewSave(uniqueSaveName, newPlayerData)) {
+        std::cerr << "Error creating new save!" << std::endl;
+        return;
+    }
+
+    std::cout << "New save created: " << uniqueSaveName << std::endl;
+
+    // Загружаем сейв (опционально, можно использовать newPlayerData напрямую)
+    PlayerData loadedData;
+    if (!saveManager.loadSave(uniqueSaveName, loadedData)) {
+        std::cerr << "Error to load save!" << std::endl;
+        return;
+    }
+
+    // Переходим к следующей сцене — созданию персонажа или игре
+    nextScene = std::make_unique<CharacterOrigin>(config);
+    finished = true;
+}
+

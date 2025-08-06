@@ -13,8 +13,9 @@
 #include <CharacterCreationScenes.h>
 #include "CharacterSpecializationScene.h"
 #include "GlitchRenderer.h"
+#include "WorldCreationScene.h"
 
-CharacterOrigin::CharacterOrigin(GameConfig& config) : config(config) {
+WorldButton::WorldButton(GameConfig& config) : config(config) {
     bool fontLoaded = false;
 
     std::vector<std::string> fontPaths = {
@@ -26,7 +27,7 @@ CharacterOrigin::CharacterOrigin(GameConfig& config) : config(config) {
     };
 
     for (const auto& path : fontPaths) {
-        if (font.openFromFile(path)) {  // ИСПРАВЛЕНО: loadFromFile -> openFromFile
+        if (font.openFromFile(path)) { 
             fontLoaded = true;
             std::cout << "Font loaded successfully from: " << path << std::endl;
             break;
@@ -45,13 +46,13 @@ CharacterOrigin::CharacterOrigin(GameConfig& config) : config(config) {
     }
 
     // ИСПРАВЛЕНО: В SFML 3 sf::Text требует font в конструкторе
-    OriginText = std::make_unique<sf::Text>(font, "CHOOSE YOUR ORIGIN");
-    OriginText->setCharacterSize(100);
-    OriginText->setFillColor(sf::Color(139, 0, 0)); // setFillColor вместо setColor
-    OriginText->setPosition(sf::Vector2f(10.f, 10.f));
+    WorldText = std::make_unique<sf::Text>(font, "CHOOSE THE WORLD TYPE");
+    WorldText->setCharacterSize(100);
+    WorldText->setFillColor(sf::Color(139, 0, 0)); // setFillColor вместо setColor
+    WorldText->setPosition(sf::Vector2f(10.f, 10.f));
 
     // Если используется menuItems, убедись, что оно объявлено (vector<sf::Drawable*> menuItems;)
-    menuItems.push_back(OriginText.get());
+    menuItems.push_back(WorldText.get());
 
     // Загрузка кнопок (обновлено для хранения текстур)
     for (const auto& [label, texturePath] : origins) {
@@ -61,11 +62,11 @@ CharacterOrigin::CharacterOrigin(GameConfig& config) : config(config) {
         }
         textures.push_back(tex); // сохраняем чтобы не удалялись
 
-        OriginButton button(font);
+        WorldButton button(font);
         button.setTexture(tex);
         button.label = label;
         button.labelText.setString(label);
-        originButtons.push_back(std::move(button));
+        worldButton.push_back(std::move(button));
     }
 
     // Настройка глитч эффектов
@@ -73,13 +74,13 @@ CharacterOrigin::CharacterOrigin(GameConfig& config) : config(config) {
     glitchRenderer.setAnalogGlitch(true);       // Включаем аналоговый глитч
 }
 
-void CharacterOrigin::update(float dt, sf::RenderWindow& window) {
+void WorldButton::update(float dt, sf::RenderWindow& window) {
     glitchRenderer.update(dt);
     updatePositions(window);
 
     sf::Vector2f mouseWorld = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-    for (auto& btn : originButtons) {
+    for (auto& btn : worldButton) {
         if (btn.getBounds().contains(mouseWorld)) {
             btn.border.setOutlineColor(sf::Color::Yellow);
             // Можно добавить дополнительные эффекты при наведении
@@ -90,7 +91,7 @@ void CharacterOrigin::update(float dt, sf::RenderWindow& window) {
     }
 }
 
-void CharacterOrigin::render(sf::RenderWindow& window) {
+void WorldButton::render(sf::RenderWindow& window) {
     std::cout << "Rendering background..." << std::endl;
     if (backgroundSprite.has_value()) {
         auto windowSize = window.getSize();
@@ -144,7 +145,7 @@ void CharacterOrigin::render(sf::RenderWindow& window) {
     glitchRenderer.renderCyberpunkSquares(window, 8); // 8 квадратов
 }
 
-void CharacterOrigin::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
+void WorldButton::handleEvent(const sf::Event& event, sf::RenderWindow& window) {
     // ИСПРАВЛЕНО: В SFML 3 новый API для событий
     if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>()) {
         sf::Vector2f worldPos = window.mapPixelToCoords({ mousePressed->position.x, mousePressed->position.y });
@@ -152,7 +153,7 @@ void CharacterOrigin::handleEvent(const sf::Event& event, sf::RenderWindow& wind
         for (const auto& btn : originButtons) {
             if (btn.contains(worldPos)) {
                 std::cout << btn.label << " selected\n";
-                nextScene = std::make_unique<CharacterSpecialization>(config);
+                //nextScene = std::make_unique<CharacterSpecialization>(config);
                 finished = true;
                 break;
             }
@@ -166,15 +167,15 @@ void CharacterOrigin::handleEvent(const sf::Event& event, sf::RenderWindow& wind
     }
 }
 
-bool CharacterOrigin::isFinished() const {
+bool WorldButton::isFinished() const {
     return finished;
 }
 
-std::unique_ptr<Scene> CharacterOrigin::extractNextScene() {
+std::unique_ptr<Scene> WorldButton::extractNextScene() {
     return std::move(nextScene);
 }
 
-void CharacterOrigin::updatePositions(sf::RenderWindow& window) {
+void WorldButton::updatePositions(sf::RenderWindow& window) {
     auto windowSize = window.getSize();
 
     const float baseWidth = 1280.f;
@@ -190,15 +191,14 @@ void CharacterOrigin::updatePositions(sf::RenderWindow& window) {
     const float buttonHeight = 300.f;
     const float spacing = 5.f;
 
-    for (size_t i = 0; i < originButtons.size(); ++i) {
+    for (size_t i = 0; i < worldButton.size(); ++i) {
         float x = (baseX + i * (buttonHeight + spacing)) * scaleX;
         float y = baseY * scaleY;
 
         // ИСПРАВЛЕНО: sf::Vector2f вместо отдельных параметров
-        originButtons[i].setPosition({ x, y });
-        originButtons[i].setSize({ buttonWidth * scaleX, buttonHeight * scaleY });
-        originButtons[i].labelText.setCharacterSize(static_cast<unsigned int>(36 * scale));
-        originButtons[i].labelText.setPosition({ x + 10.f, y + buttonHeight * scaleY + 10.f });
+        worldButton[i].setPosition({ x, y });
+        worldButton[i].setSize({ buttonWidth * scaleX, buttonHeight * scaleY });
+        worldButton[i].labelText.setCharacterSize(static_cast<unsigned int>(36 * scale));
+        worldButton[i].labelText.setPosition({ x + 10.f, y + buttonHeight * scaleY + 10.f });
     }
 }
-

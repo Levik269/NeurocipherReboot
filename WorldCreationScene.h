@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -8,14 +8,14 @@
 #include "GlitchRenderer.h"
 #include <iostream>
 
-struct OriginButton {
-    std::optional<sf::Sprite> sprite; 
+struct WorldButton {
+    std::optional<sf::Sprite> sprite;
     sf::Text labelText;
     sf::RectangleShape border;
     std::string label;
     std::shared_ptr<sf::Texture> texture;
 
-    OriginButton(const sf::Font& font)
+    WorldButton(const sf::Font& font)
         : labelText(font, "")
     {
         border.setFillColor(sf::Color::Transparent);
@@ -28,7 +28,7 @@ struct OriginButton {
     void setTexture(std::shared_ptr<sf::Texture> tex) {
         texture = tex;
         if (texture && texture->getSize().x > 0) {
-            sprite = sf::Sprite(*texture); // теперь можно
+            sprite = sf::Sprite(*texture); 
         }
     }
 
@@ -56,23 +56,23 @@ struct OriginButton {
     }
 };
 
-class CharacterOrigin : public Scene {
+class WorldType : public Scene {
 private:
 
-    std::vector<std::pair<std::string, std::string>> origins = {
-        {"Punk", "assets/textures/z.png"},
-        {"Corpo", "assets/textures/corpo.png"},
-        {"Street", "assets/textures/street.png"},
-        {"Tech", "assets/textures/tech.png" }
+    std::vector<std::pair<std::string, std::string>> worlds = {
+        {"Plot", "assets/textures/z.png"},
+        {"Free", "assets/textures/corpo.png"},
+        {"Superflat", "assets/textures/street.png"},
+        {"Custom", "assets/textures/tech.png" }
     };
 
     sf::Texture backgroundTexture;
     std::optional<sf::Sprite> backgroundSprite;
-    std::vector<OriginButton> originButtons;
-    std::vector<std::shared_ptr<sf::Texture>> textures; // Храним текстуры здесь!
+    std::vector<WorldButton> worldButton;
+    std::vector<std::shared_ptr<sf::Texture>> textures; 
     sf::Font font;
     GameConfig& config;
-    std::unique_ptr<sf::Text> OriginText;
+    std::unique_ptr<sf::Text> WorldText;
     GlitchRenderer glitchRenderer;
     std::unique_ptr<Scene> nextScene;
     bool finished = false;
@@ -82,12 +82,10 @@ private:
     void updatePositions(sf::RenderWindow& window);
 
 public:
-    CharacterOrigin(GameConfig& config);
+    WorldType(GameConfig& config);
     void update(float deltaTime, sf::RenderWindow& window) override;
     void render(sf::RenderWindow& window) override;
     void handleEvent(const sf::Event& event, sf::RenderWindow& window) override;
     bool isFinished() const override;
     std::unique_ptr<Scene> extractNextScene();
 };
-
-

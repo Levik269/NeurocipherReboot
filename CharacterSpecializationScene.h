@@ -1,21 +1,19 @@
-﻿#pragma once
+﻿//CharacterSpecializationScene.h
+#pragma once
 #include <SFML/Graphics.hpp>
 #include <memory>
-#include <vector>
-#include <optional>
 #include "Scene.h"
 #include "Config.h"
 #include "GlitchRenderer.h"
-#include <iostream>
 
-struct OriginButton {
-    std::optional<sf::Sprite> sprite; 
+struct SpecButton {
+    std::optional<sf::Sprite> sprite;
     sf::Text labelText;
     sf::RectangleShape border;
     std::string label;
     std::shared_ptr<sf::Texture> texture;
 
-    OriginButton(const sf::Font& font)
+    SpecButton(const sf::Font& font)
         : labelText(font, "")
     {
         border.setFillColor(sf::Color::Transparent);
@@ -28,7 +26,7 @@ struct OriginButton {
     void setTexture(std::shared_ptr<sf::Texture> tex) {
         texture = tex;
         if (texture && texture->getSize().x > 0) {
-            sprite = sf::Sprite(*texture); // теперь можно
+            sprite = sf::Sprite(*texture); 
         }
     }
 
@@ -56,38 +54,36 @@ struct OriginButton {
     }
 };
 
-class CharacterOrigin : public Scene {
+class CharacterSpecialization : public Scene {
 private:
 
-    std::vector<std::pair<std::string, std::string>> origins = {
-        {"Punk", "assets/textures/z.png"},
-        {"Corpo", "assets/textures/corpo.png"},
-        {"Street", "assets/textures/street.png"},
-        {"Tech", "assets/textures/tech.png" }
+    std::vector<std::pair<std::string, std::string>> spec = {
+        {"Hacker", "assets/textures/z.png"},
+        {"Mercenary", "assets/textures/corpo.png"},
+        {"Trader", "assets/textures/street.png"},
+        {"Engineer", "assets/textures/tech.png" },
+        {"Soldier", "assets/textures/z.png" },
+        {"Detective", "assets/textures/corpo.png"}
     };
 
     sf::Texture backgroundTexture;
     std::optional<sf::Sprite> backgroundSprite;
-    std::vector<OriginButton> originButtons;
-    std::vector<std::shared_ptr<sf::Texture>> textures; // Храним текстуры здесь!
+    std::vector<SpecButton> SpecButtons;
+    std::vector<std::shared_ptr<sf::Texture>> textures; 
     sf::Font font;
     GameConfig& config;
-    std::unique_ptr<sf::Text> OriginText;
+    std::unique_ptr<sf::Text> SpecializationText;
     GlitchRenderer glitchRenderer;
     std::unique_ptr<Scene> nextScene;
     bool finished = false;
     std::vector<sf::Drawable*> menuItems;
-
-
+    int hoveredIndex = -1;
     void updatePositions(sf::RenderWindow& window);
-
 public:
-    CharacterOrigin(GameConfig& config);
+    CharacterSpecialization(GameConfig& config);
     void update(float deltaTime, sf::RenderWindow& window) override;
     void render(sf::RenderWindow& window) override;
     void handleEvent(const sf::Event& event, sf::RenderWindow& window) override;
     bool isFinished() const override;
     std::unique_ptr<Scene> extractNextScene();
 };
-
-
